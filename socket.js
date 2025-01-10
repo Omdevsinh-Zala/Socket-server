@@ -15,7 +15,7 @@ const io = new Server(server, {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 app.get('/', (req, res) => {
-    res.sendFile(join(''));
+    res.sendFile(join(__dirname,'index.html'));
 });
 
 // Handle socket connections
@@ -36,4 +36,7 @@ io.on('connection', (socket) => {
     });
   });
 
-server.listen();
+  const port = process.env.PORT || 3000
+server.listen(() => {
+  console.log(`Server running on ${port}`);
+});
