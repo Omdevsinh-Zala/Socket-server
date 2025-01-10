@@ -36,6 +36,4 @@ io.on('connection', (socket) => {
     });
   });
 
-server.listen(3000, () => {
-    console.log('server running at http://192.168.1.141:3000');
-});
+server.listen();
