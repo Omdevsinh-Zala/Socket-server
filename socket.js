@@ -9,7 +9,8 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*",
-  }
+  },
+  connectionStateRecovery: {}
 });
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -18,17 +19,37 @@ app.get('/', (req, res) => {
   res.sendFile(join(__dirname, 'index.html'));
 });
 
+//To check user
+io.use((socket, next) => {
+  const username = socket.handshake.auth.username;
+  if (!username) {
+    return next(new Error("invalid username"));
+  }
+  socket.username = username;
+  next();
+});
+
 // Handle socket connections
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
-
+  const users = [];
+  for(let [id, socket] of io.of('/').sockets) {
+    users.push({
+      userID: id,
+      username: socket.username
+    })
+  }
+  socket.emit('users', users);
+  socket.broadcast.emit('user conected', {
+    userID: socket.id,
+    username: socket.username
+  })
   // Example: Receiving a message from the client
-  socket.on('message', (data) => {
-    console.log('Message received:', data);
+  // socket.on('message', (data) => {
+  //   console.log('Message received:', data);
 
-    // Broadcast the message to other connected clients
-    io.emit('message', data)
-  });
+  //   // Broadcast the message to other connected clients
+  //   io.emit('message', data)
+  // });
 
   // Handle disconnection
   socket.on('disconnect', () => {
